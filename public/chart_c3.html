@@ -1,0 +1,109 @@
+<html>
+    <!doctype html>
+    <html lang="ja">
+    <head>
+    <meta charset="UTF-8">
+      <link   href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.0/c3.min.css" rel="stylesheet" type="text/css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.0/c3.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
+      <title>c3.jsによるグラフ表示</title>
+    </head>
+<body>
+    <h1>Biorhythm Chart : c3.js Chart Sample</h1>
+    <div id="chart"></div>
+    <script>
+        var chart = c3.generate({
+          bindto: '#chart',
+          data: {
+            x: 'datetime',
+            columns: [] 
+          },
+          axis: {
+            x: {
+              label: { text: '日時', position: 'outer-right',},
+              type: 'timeseries',
+              tick: {
+                centered: false,
+                format: '%Y-%m-%d',
+              }
+            },
+          },
+          grid: {
+            x: {
+              lines: [
+                // https://c3js.org/reference.html#grid-x-lines
+                // If x axis is category axis, value can be category name. If x axis is timeseries axis, value can be date string, Date object and unixtime integer.
+                {value: moment().format('YYYY-MM-DD'), text: '基準日', position: 'start'},
+              ]
+            },
+            y: {
+              show: true,
+              lines: [
+                {value: 0.0, text: '不安定', axis: 'y', position: 'start'},
+                {value: 1.0, text: '高調', axis: 'y', position: 'start'},
+                {value: -1.0, text: '低調', axis: 'y', position: 'start'},
+              ]
+            }
+          },
+          // zoom 
+          zoom: {enabled: true},
+          // sub chart(Experimental)
+          subchart: {show: true}
+        }); 
+        //--------------------------
+    
+        var req = new XMLHttpRequest();
+        req.open( "GET", "/.netlify/functions/biorhythm" , true);
+        req.responseType = 'json';
+        req.send();
+    
+        req.onreadystatechange = function() {
+          if( req.readyState == 4 && req.status == 200 ) {
+    
+            console.log(req.readyState + ' : OK')
+            console.log(req.response.data)
+    
+            let count = req.response.data.length
+            console.log( 'data count:' + count )
+    
+            let bio = {
+              time: [],  p: [], s: [], i: [],
+              init: function() {
+                  this.time = ['datetime'];
+                  this.p = ['physical'];
+                  this.s = ['sensitivity'];
+                  this.i = ['intellectual'];
+              },
+            }
+            bio.init()
+    
+            const drawgraph = function(count){
+              for (let i = 0; i < count; i++) {
+                let unit = req.response.data[i]
+                //console.log( 'data unit:' + unit.time )
+                let tv = unit.time
+    
+                let yv = function(psi) {
+                  return Number(psi)
+                }
+                bio.time.push(unit.time)
+                bio.p.push(yv(unit.physical))
+                bio.s.push(yv(unit.sensitivity))
+                bio.i.push(yv(unit.intellectual))
+              }
+            }
+    
+            drawgraph(count)
+            const biodata = [ bio.time, bio.p, bio.s, bio.i ]
+            chart.load( {columns: biodata});
+            const xgrids = [
+                {value: moment().add(5, 'days').format('YYYY-MM-DD')}, 
+                {value: moment().add(-5, 'days').format('YYYY-MM-DD')}
+            ]
+            chart.xgrids.add(xgrids)
+          }
+        }
+    </script>
+</body>
+</html>
