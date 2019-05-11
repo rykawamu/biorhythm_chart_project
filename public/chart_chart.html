@@ -3,17 +3,14 @@
     <html lang="ja">
     <head>
       <meta charset="UTF-8">
-      <link   href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.0/c3.min.css" rel="stylesheet" type="text/css">
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.0/c3.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
-      <title>c3.jsによるグラフ表示</title>
+      <title>Chart.jsによるチャート表示</title>
     </head>
 <body>
-    <h1>Biorhythm Chart : c3.js Chart Sample</h1>
+    <h1>Biorhythm Chart : chart.js Chart Sample</h1>
 
     <canvas id="myChart_d" width="240" height="120"></canvas>
-    
     <script>
         const req = new XMLHttpRequest();
         req.open( "GET", "/.netlify/functions/biorhythm" , true);
@@ -23,7 +20,6 @@
         req.onreadystatechange = function() {
             if( req.readyState == 4 && req.status == 200 ) {
 
-                console.log(req.readyState + ' : OK')
                 console.log(req.response.data)
 
                 const count = req.response.data.length
@@ -62,7 +58,6 @@
                     }
                     myChart.update()
                 }
-
                 drawgraph(count)
             }
         }
@@ -72,19 +67,19 @@
             type: 'line',
             data: {
                 datasets: [{
-                    label: '# of P',
+                    label: '# of Physical',
                     data: [],
                     backgroundColor: 'rgba(0, 0, 255, 0.3)',
                     borderWidth: 1
                 }
                 ,{
-                    label: '# of S',
+                    label: '# of Sensitivity',
                     data: [],
                     backgroundColor: 'rgba(255, 0, 0, 0.3)',
                     borderWidth: 1
                 }
                 ,{
-                    label: '# of I',
+                    label: '# of Intellectual',
                     data: [],
                     backgroundColor: 'rgba(0, 255, 0, 0.3)',
                     borderWidth: 1
@@ -93,29 +88,15 @@
             options: {
                 scales: {
                     xAxes: [{
-                        //display: true,
                         type: 'time',
                         distribution: 'series',
                         time: {
-                            // ここの二つはセット
                             unit: 'day',
                             displayFormats: {'day': 'YYYY-MM-DD'}
                         }
                     }],
                     yAxes: [{
                         ticks: {
-                            callback: function(label, index, labels){
-                                let nl = label
-                                const units = ['K','M','G']
-                                for(const [idx, ut] of units.entries() ){
-                                    let xv = Math.floor(label / Math.pow(1000,(idx + 1)))
-                                    if (xv > 0) {
-                                        nl = xv + units[idx]
-                                    }
-                                }
-                                return nl
-                            },
-                            //beginAtZero: true
                         }
                     }]
                 }
