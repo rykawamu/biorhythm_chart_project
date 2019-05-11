@@ -1,0 +1,25 @@
+{
+  "name": "biorhythm_chart_project",
+  "version": "1.0.0",
+  "description": "バイオリズムのデータをchartを使って表現する",
+  "main": "index.js",
+  "scripts": {
+    "build": "netlify-lambda build src/",
+    "serve": "netlify-lambda serve src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rykawamu/biorhythm_chart_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rykawamu/biorhythm_chart_project/issues"
+  },
+  "homepage": "https://github.com/rykawamu/biorhythm_chart_project#readme",
+  "dependencies": {
+    "moment": "^2.24.0",
+    "netlify-lambda": "^1.4.7"
+  }
+}

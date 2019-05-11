@@ -59,3 +59,8 @@ typings/
 
 # next.js build output
 .next
+
+# Netlify
+functions
+node_modules
+
