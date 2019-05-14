@@ -7,6 +7,9 @@ exports.handler = function(event, context, callback) {
   console.log(JSON.stringify(data, null, 4))
   callback(null, {
     statusCode: 200,
+    headers: {
+      'Content-type': 'application/json'
+    },
     body: JSON.stringify(data, null, 4)
   });
 }
