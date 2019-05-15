@@ -32,7 +32,7 @@
     req.send();
 
     // Line Chart用データ
-    let chartData = [];
+    var chartData = [];
 
     // 受信処理の実施
     req.onreadystatechange = function() {
@@ -74,10 +74,11 @@
       data.addColumn('number', 'sensitivity');
       data.addColumn('number', 'intellectual');
 
+      console.log( 'charData count:' + chartData.length )
       data.addRows(chartData);
 
       var options = {
-        'title':'How Much Pizza I Ate Last Night',
+        'title': 'Biorhythm Line Chart',
         'width':900, 'height':500,
 //        'is3D':true,
         hAxis: {
