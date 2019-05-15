@@ -1,0 +1,148 @@
+<html>
+    <!doctype html>
+    <html lang="ja">
+    <head>
+      <meta charset="UTF-8">
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
+      <title>google chartによるグラフ表示</title>
+    </head>
+<body>
+  <h1>Biorhythm Chart : Google Chart Sample</h1>
+
+  <h2>Line chart</h2>
+  <div id="chart_div"></div>
+
+  <h2>Maerial line chart</h2>
+  <div id="linechart_material"></div>
+
+  <h2>Printing PNG Charts</h2>
+  <div id="linechart_png"></div>
+
+  <script>
+
+    // https://developers.google.com/chart/interactive/docs/gallery/linechart
+    google.charts.load('current', {packages: ['corechart', 'line']});
+    google.charts.setOnLoadCallback(drawChart);
+    google.charts.setOnLoadCallback(drawChartMaterial);
+
+    const req = new XMLHttpRequest();
+    req.open( "GET", "/.netlify/functions/biorhythm" , true);
+    req.responseType = 'json';
+    req.send();
+
+    // Line Chart用データ
+    let chartData = [];
+
+    // 受信処理の実施
+    req.onreadystatechange = function() {
+      if( req.readyState == 4 && req.status == 200 ) {
+
+        console.log(req.response.data)
+
+        let count = req.response.data.length
+        console.log( 'data count:' + count )
+
+        chartData = [];
+
+        // json -> array
+        const createData = function(count){
+          for (let i = 0; i < count; i++) {
+            const unit = req.response.data[i]
+            //console.log( 'data unit:' + unit.time )
+
+            let cur_psi_data = []
+            cur_psi_data.push(unit.time)
+            cur_psi_data.push(Number(unit.physical));
+            cur_psi_data.push(Number(unit.sensitivity));
+            cur_psi_data.push(Number(unit.intellectual));
+
+            chartData.push(cur_psi_data)
+          }
+        }
+
+        createData(count)
+      }
+    }
+
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'X');
+      data.addColumn('number', 'physical');
+      data.addColumn('number', 'sensitivity');
+      data.addColumn('number', 'intellectual');
+
+      data.addRows(chartData);
+
+      var options = {
+        'title':'How Much Pizza I Ate Last Night',
+        'width':900, 'height':500,
+//        'is3D':true,
+        hAxis: {
+          title: 'Date',
+          gridlines: {color: '#333', count: 10}
+        },
+        vAxis: {
+          title: 'Biorhythm PSI',
+          gridlines: {color: '#333', count: 10}
+        },
+        backgroundColor: '#f1f8e9',
+//        colors: ['#a52714', '#097138'],
+        crosshair: {
+          color: '#000',
+          trigger: 'selection'
+        }
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+      // printing png :
+      // https://developers.google.com/chart/interactive/docs/printing
+      let my_chart_div = document.getElementById('linechart_png');
+      google.visualization.events.addListener(chart, 'ready', function () {
+        my_chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+      });
+
+      chart.draw(data, options);
+//      chart.setSelection([{row: 31, column: 1}]);
+    }
+
+
+    function drawChartMaterial() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'X');
+      data.addColumn('number', 'physical');
+      data.addColumn('number', 'sensitivity');
+      data.addColumn('number', 'intellectual');
+
+      data.addRows(chartData);
+
+      var options = {
+        chart: {
+          title: '(BETA)Box Office Earnings in First Two Weeks of Opening',
+          subtitle: 'in millions of dollars (USD)'
+        },
+        width: 900,
+        height: 500,
+        hAxis: {
+          title: 'Date',
+//          gridlines: {color: '#222', count: -1}
+        },
+        vAxis: {
+          title: 'Biorhythm PSI',
+          minorGridlines: {color: '#333', count: 10}
+        },
+      };
+
+      var chart = new google.charts.Line(document.getElementById('linechart_material'));
+
+      chart.draw(data, google.charts.Line.convertOptions(options));
+    }
+
+
+  </script>
+</body>
+</html>
