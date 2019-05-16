@@ -13,62 +13,69 @@
   <h2>Line chart</h2>
   <div id="chart_div"></div>
 
-  <h2>Maerial line chart</h2>
-  <div id="linechart_material"></div>
-
   <h2>Printing PNG Charts</h2>
   <div id="linechart_png"></div>
+
+  <h2>Maerial line chart</h2>
+  <div id="linechart_material"></div>
 
   <script>
 
     // https://developers.google.com/chart/interactive/docs/gallery/linechart
     google.charts.load('current', {packages: ['corechart', 'line']});
     google.charts.setOnLoadCallback(drawChart);
-//    google.charts.setOnLoadCallback(drawChartMaterial);
-
-    const req = new XMLHttpRequest();
-    req.open( "GET", "/.netlify/functions/biorhythm" , true);
-    req.responseType = 'json';
-    req.send();
-
-    // Line Chart用データ
-    var chartData = [];
-
-    // 受信処理の実施
-    req.onreadystatechange = function() {
-      if( req.readyState == 4 && req.status == 200 ) {
-
-        console.log(req.response.data)
-
-        let count = req.response.data.length
-        console.log( 'data count:' + count )
-
-        chartData = [];
-
-        // json -> array
-        const createData = function(count){
-          for (let i = 0; i < count; i++) {
-            const unit = req.response.data[i]
-            //console.log( 'data unit:' + unit.time )
-
-            let cur_psi_data = []
-            cur_psi_data.push(unit.time)
-            cur_psi_data.push(Number(unit.physical));
-            cur_psi_data.push(Number(unit.sensitivity));
-            cur_psi_data.push(Number(unit.intellectual));
-
-            chartData.push(cur_psi_data)
-          }
-        }
-
-        createData(count)
-      }
-    }
 
 
     function drawChart() {
 
-      var data = new google.visualization.DataTable();
+      const req = new XMLHttpRequest();
+      req.open( "GET", "/.netlify/functions/biorhythm" , true);
+      req.responseType = 'json';
+      req.send();
+
+      // Line Chart用データ
+      let chartData = [];
+
+      // 受信処理の実施
+      req.onreadystatechange = function() {
+        if( req.readyState == 4 && req.status == 200 ) {
+
+          console.log(req.response.data);
+
+          let count = req.response.data.length;
+          console.log( 'data count:' + count );
+
+          chartData = [];
+          // json -> array
+          const createData = function(count){
+            for (let i = 0; i < count; i++) {
+              const unit = req.response.data[i];
+              //console.log( 'data unit:' + unit.time )
+
+              let cur_psi_data = [];
+              cur_psi_data.push(unit.time);
+              cur_psi_data.push(Number(unit.physical));
+              cur_psi_data.push(Number(unit.sensitivity));
+              cur_psi_data.push(Number(unit.intellectual));
+
+              chartData.push(cur_psi_data);
+            }
+          }
+          createData(count);
+
+          // Google Line Chart の描画
+          drawChartNormal(chartData);
+          drawChartMaterial(chartData);
+
+        }
+      }
+
+    }
+
+
+    function drawChartNormal(chartData) {
+
+      const data = new google.visualization.DataTable();
       data.addColumn('string', 'X');
       data.addColumn('number', 'physical');
       data.addColumn('number', 'sensitivity');
@@ -77,7 +84,7 @@
       console.log( 'charData count:' + chartData.length )
       data.addRows(chartData);
 
-      var options = {
+      const options = {
         'title': 'Biorhythm Line Chart',
         'width':900, 'height':500,
 //        'is3D':true,
@@ -97,11 +104,11 @@
         }
       };
 
-      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      const chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
       // printing png :
       // https://developers.google.com/chart/interactive/docs/printing
-      let my_chart_div = document.getElementById('linechart_png');
+      const my_chart_div = document.getElementById('linechart_png');
       google.visualization.events.addListener(chart, 'ready', function () {
         my_chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
       });
@@ -111,37 +118,39 @@
     }
 
 
-//    function drawChartMaterial() {
-//
-//      var data = new google.visualization.DataTable();
-//      data.addColumn('string', 'X');
-//      data.addColumn('number', 'physical');
-//      data.addColumn('number', 'sensitivity');
-//      data.addColumn('number', 'intellectual');
-//
-//      data.addRows(chartData);
-//
-//      var options = {
-//        chart: {
-//          title: '(BETA)Box Office Earnings in First Two Weeks of Opening',
-//          subtitle: 'in millions of dollars (USD)'
-//        },
-//        width: 900,
-//        height: 500,
-//        hAxis: {
-//          title: 'Date',
-////          gridlines: {color: '#222', count: -1}
-//        },
-//        vAxis: {
-//          title: 'Biorhythm PSI',
-//          minorGridlines: {color: '#333', count: 10}
-//        },
-//      };
-//
-//      var chart = new google.charts.Line(document.getElementById('linechart_material'));
-//
-//      chart.draw(data, google.charts.Line.convertOptions(options));
-//    }
+    function drawChartMaterial(chartData) {
+
+      const data = new google.visualization.DataTable();
+      data.addColumn('string', 'X');
+      data.addColumn('number', 'physical');
+      data.addColumn('number', 'sensitivity');
+      data.addColumn('number', 'intellectual');
+
+      data.addRows(chartData);
+
+      const options = {
+        chart: {
+          title: 'Biorhythm Line Chart (Material) ',
+          subtitle: 'This chart is Bata.'
+        },
+        width: 900,
+        height: 500,
+        hAxis: {
+          title: 'Date',
+//          gridlines: {color: '#222', count: -1}
+        },
+        vAxis: {
+          title: 'Biorhythm PSI',
+          minorGridlines: {color: '#333', count: 10}
+        },
+      };
+
+      const chart = new google.charts.Line(document.getElementById('linechart_material'));
+
+      // Material側では、「getImageURI()」は使えなかった
+
+      chart.draw(data, google.charts.Line.convertOptions(options));
+    }
 
 
   </script>
