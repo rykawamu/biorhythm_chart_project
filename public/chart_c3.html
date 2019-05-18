@@ -48,6 +48,10 @@
           },
           // zoom 
           zoom: {enabled: true},
+          // animation: tansition duration: miliseconds
+          transition: {
+            duration: 5000
+          },
           // sub chart(Experimental)
           subchart: {show: true}
         }); 
@@ -96,14 +100,15 @@
     
             drawgraph(count)
             const biodata = [ bio.time, bio.p, bio.s, bio.i ]
-            chart.load( {columns: biodata});
             const xgrids = [
                 {value: moment().add(5, 'days').format('YYYY-MM-DD')}, 
                 {value: moment().add(-5, 'days').format('YYYY-MM-DD')}
             ]
             chart.xgrids.add(xgrids)
+            chart.load( {columns: biodata});
           }
         }
     </script>
 </body>
 </html>
+
