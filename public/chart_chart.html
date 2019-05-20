@@ -8,6 +8,8 @@
     </head>
 <body>
     <h1>Biorhythm Chart : chart.js Chart Sample</h1>
+    <button id="preDate">Pre Date</button>
+    <button id="nextDate">Netx Date</button>
 
     <h2>BASIC</h2>
     <div style="width:90%;">
@@ -174,6 +176,34 @@
         }
         var ctxf = document.getElementById('myChart_f');
         var myChartF = new Chart(ctxf, config_f);
+
+        // Appendix
+        var target_date = moment();
+        function chart_data_clear() {
+           myChart.data.datasets[0].data = [];
+           myChart.data.datasets[1].data = [];
+           myChart.data.datasets[2].data = [];
+
+           myChartF.data.datasets[0].data = [];
+           myChartF.data.datasets[1].data = [];
+           myChartF.data.datasets[2].data = [];
+        }
+        function modify_biorhythm_base(n) {
+           const cur_date = target_date.add(n, 'days').format('YYYY-MM-DD');
+           console.log(cur_date)
+
+           chart_data_clear();
+           const url = "/.netlify/functions/biorhythm?base_date=" + cur_date + "&period=30"
+           req.open( "GET", url, true);
+           req.responseType = 'json';
+           req.send();
+        }
+		document.getElementById('nextDate').addEventListener('click', function() {
+            modify_biorhythm_base(1);
+		});
+		document.getElementById('preDate').addEventListener('click', function() {
+            modify_biorhythm_base(-1);
+		});
     </script>
 </body>
 </html>
