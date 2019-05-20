@@ -7,11 +7,12 @@ exports.handler = function(event, context, callback) {
   const param = {
     birth_date_str: qsp.birth_date,
     base_date_str:  qsp.base_date,
+    period_str:     qsp.period,
   }
-  const [birth_date, base_date] = biorhythm_param_date(param);
+  const [birth_date, base_date, period] = biorhythm_param_date(param);
 
-  const data = create_data(birth_date, base_date)
-  console.debug(JSON.stringify(data, null, 4))
+  const data = create_data(birth_date, base_date, period);
+  console.debug(JSON.stringify(data, null, 4));
 
   callback(null, {
     statusCode: 200,
@@ -24,9 +25,9 @@ exports.handler = function(event, context, callback) {
 }
 
 /**
- * バイオリズムデータのパラメータになる日付データを返します
+ * バイオリズムデータのパラメータになる日付データと日数を返します
  * @param {Object} param param クエリストリングから取得した「誕生日」「基準日」の情報。
- * @return [Moment, Moment] Momentオブジェクトを「誕生日」「基準日」で配列形式で格納
+ * @return [Moment, Moment, Number] Momentオブジェクトの「誕生日」「基準日」とNumberの「日数」を配列形式で格納
  */
 function biorhythm_param_date(param) {
   console.debug("[" + param.birth_date_str + "]:[" + param.base_date_str + "]");
@@ -43,7 +44,13 @@ function biorhythm_param_date(param) {
   // https://keisan.casio.jp/exec/system/1231994137
   // 基準日を現在日に指定
   const base_date  = target_date(param.base_date_str, moment());
-  return [birth_date, base_date];
+  //期間の日数: デフォルト60日、有効期間を20-100日で定義
+  const period = (function(period_str, def_period) {
+    const n = parseInt(period_str, 10);
+    return (n >= 20 && n <= 100) ? n : def_period;
+  }(param.period_str, 60));
+
+  return [birth_date, base_date, period];
 }
 
 /**
@@ -52,10 +59,11 @@ function biorhythm_param_date(param) {
  * @param {Moment} base_date 基準日のMomentオブジェクト
  * @return {Object} バイオリズムデータの含まれたjsonデータ
  */
-function create_data(birth_date, base_date) {
+function create_data(birth_date, base_date, period) {
 
-  let graph_data = []
-  for (let i = -30; i <= 30; i++) {
+  let graph_data = [];
+  const half_period = Math.floor(period / 2);
+  for (let i = -half_period; i <= half_period; i++) {
     const cur_date = base_date.clone().add(i, 'days')
     const cur_date_str = cur_date.format('YYYY-MM-DD')
     // 経過日数
@@ -78,7 +86,7 @@ function create_data(birth_date, base_date) {
       elapsed_days: elapsed_days, value: i,
       physical: p_v, sensitivity: s_v, intellectual: i_v
     }
-    graph_data.push(graph_element)
+    graph_data.push(graph_element);
   }
 
   // json data
@@ -86,6 +94,7 @@ function create_data(birth_date, base_date) {
     version: '1.0.0',
     birth_date: birth_date.clone().format('YYYY-MM-DD'),
     base_date: base_date.clone().format('YYYY-MM-DD'),
+    period: period + '', //文字列化
     data: graph_data
   };
   return data;
