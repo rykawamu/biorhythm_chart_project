@@ -1,5 +1,4 @@
 <html>
-    <!doctype html>
     <html lang="ja">
     <head>
       <meta charset="UTF-8">
@@ -10,7 +9,12 @@
 <body>
     <h1>Biorhythm Chart : chart.js Chart Sample</h1>
 
-    <canvas id="myChart_d" width="240" height="120"></canvas>
+    <h2>BASIC</h2>
+    <div style="width:90%;">
+      <canvas id="myChart_b"></canvas>
+    </div>
+    <h2>fill version</h2>
+    <canvas id="myChart_f" width="240" height="120"></canvas>
     <script>
         const req = new XMLHttpRequest();
         req.open( "GET", "/.netlify/functions/biorhythm" , true);
@@ -20,16 +24,15 @@
         req.onreadystatechange = function() {
             if( req.readyState == 4 && req.status == 200 ) {
 
-                console.log(req.response.data)
-
                 const count = req.response.data.length
                 console.log( 'data count:' + count )
+                console.debug(req.response.data)
 
                 const drawgraph = function(count){
 
                     for (let i = 0; i < count; i++) {
                         let unit = req.response.data[i]
-                        console.log( 'data unit:' + unit.time )
+                        console.debug( 'data unit:' + unit.time )
                         let tv = unit.time
 
                         for(let j =0; j < 3; j++){
@@ -54,34 +57,95 @@
                                 y: Number(yv(j)),
                                 t: tv
                             });
+                            myChartF.data.datasets[j].data.push({
+                                y: Number(yv(j)),
+                                t: tv
+                            });
                         }
                     }
                     myChart.update()
+                    myChartF.update()
                 }
                 drawgraph(count)
             }
         }
 
-        var ctx = document.getElementById('myChart_d');
+        var ctx = document.getElementById('myChart_b');
         var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: '# of Physical',
+                    fill: false,
+                    data: [],
+                    backgroundColor: 'rgba(0, 0, 255, 0.3)',
+                    borderColor: 'rgba(0, 0, 255, 0.3)',
+                    borderWidth: 3
+                }
+                ,{
+                    label: '# of Sensitivity',
+                    fill: false,
+                    data: [],
+                    backgroundColor: 'rgba(255, 0, 0, 0.3)',
+                    borderColor: 'rgba(255, 0, 0, 0.5)',
+                    borderWidth: 6
+                }
+                ,{
+                    label: '# of Intellectual',
+                    fill: false,
+                    data: [],
+                    backgroundColor: 'rgba(0, 255, 0, 0.7)',
+                    borderColor: 'rgba(0, 255, 0, 1)',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        distribution: 'series',
+                        time: {
+                            unit: 'day',
+                            displayFormats: {'day': 'YYYY-MM-DD'}
+                        },
+                        scaleLabel: {
+                          display: true,
+                          labelString: '日時'
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                        }
+                    }]
+                }
+            }
+        });
+
+        // example: fill chart
+        const config_f = {
             type: 'line',
             data: {
                 datasets: [{
                     label: '# of Physical',
                     data: [],
                     backgroundColor: 'rgba(0, 0, 255, 0.3)',
-                    borderWidth: 1
+                    borderColor: 'rgba(0, 0, 255, 0.3)',
+                    borderDash: [5, 5],
+                    borderWidth: 3
                 }
                 ,{
                     label: '# of Sensitivity',
                     data: [],
                     backgroundColor: 'rgba(255, 0, 0, 0.3)',
-                    borderWidth: 1
+                    borderColor: 'rgba(255, 0, 0, 0.5)',
+                    steppedLine: true,
+                    borderWidth: 6
                 }
                 ,{
                     label: '# of Intellectual',
                     data: [],
-                    backgroundColor: 'rgba(0, 255, 0, 0.3)',
+                    backgroundColor: 'rgba(0, 255, 0, 0.7)',
+                    borderColor: 'rgba(0, 255, 0, 1)',
                     borderWidth: 1
                 }]
             },
@@ -93,6 +157,10 @@
                         time: {
                             unit: 'day',
                             displayFormats: {'day': 'YYYY-MM-DD'}
+                        },
+                        scaleLabel: {
+                          display: true,
+                          labelString: '日時'
                         }
                     }],
                     yAxes: [{
@@ -101,7 +169,9 @@
                     }]
                 }
             }
-        });
+        }
+        var ctxf = document.getElementById('myChart_f');
+        var myChartF = new Chart(ctxf, config_f);
     </script>
 </body>
 </html>
