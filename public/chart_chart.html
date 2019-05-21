@@ -8,15 +8,23 @@
     </head>
 <body>
     <h1>Biorhythm Chart : chart.js Chart Sample</h1>
-    <button id="preDate">Pre Date</button>
-    <button id="nextDate">Netx Date</button>
 
     <h2>BASIC</h2>
-    <div style="width:90%;">
+    <div style="width:50%;">
       <canvas id="myChart_b"></canvas>
     </div>
+
+    <button id="preDate">Pre Date</button>
+    <label>誕生日</label><input type="date" name="birth_date" id="birth_date" size="16" readonly>
+    <label>基準日</label><input type="date" name="base_date" id="base_date" size="16" readonly>
+    <label>表示日数</label><input type="number" name="period" id="period" max="100" min="20">
+    <button id="nextDate">Netx Date</button>
+
     <h2>fill version</h2>
-    <canvas id="myChart_f" width="240" height="120"></canvas>
+    <div style="width:50%;">
+      <canvas id="myChart_f" width="240" height="120"></canvas>
+    </div>
+
     <script>
         const req = new XMLHttpRequest();
         req.open( "GET", "/.netlify/functions/biorhythm" , true);
@@ -69,6 +77,11 @@
                     myChartF.update()
                 }
                 drawgraph(count)
+                // birth_date & base_date
+                let b1 = document.getElementById('birth_date');
+                b1.value = req.response.birth_date;
+                let b2 = document.getElementById('base_date');
+                b2.value = req.response.base_date;
             }
         }
 
@@ -193,7 +206,8 @@
            console.log(cur_date)
 
            chart_data_clear();
-           const url = "/.netlify/functions/biorhythm?base_date=" + cur_date + "&period=30"
+           const preiod_val = document.getElementById('period').value;
+           const url = "/.netlify/functions/biorhythm?base_date=" + cur_date + "&period=" + preiod_val
            req.open( "GET", url, true);
            req.responseType = 'json';
            req.send();
