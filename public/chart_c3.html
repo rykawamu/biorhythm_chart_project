@@ -10,6 +10,7 @@
 <body>
     <h1>Biorhythm Chart : c3.js Chart Sample</h1>
     <div id="chart"></div>
+    <button id="redraw">Redraw</button>
     <script>
         var chart = c3.generate({
           bindto: '#chart',
@@ -106,6 +107,37 @@
             chart.load( {columns: biodata});
           }
         }
+
+      // appendix: redraw : add 1week
+      document.getElementById('redraw').addEventListener('click', function() {
+        const redraw = document.getElementById('redraw');
+        redraw.disabled = true
+        let count_draw = 0;
+
+        const target_date = moment();
+        const modify_biorhythm_base = function(n) {
+          const cur_date = target_date.clone().add(n * 7, 'days').format('YYYY-MM-DD');
+
+          const url = "/.netlify/functions/biorhythm?base_date=" + cur_date + "&period=40";
+          console.log(cur_date + ' :: count :' + n + ' :: ' + url);
+          req.open( "GET", url , true);
+          req.responseType = 'json';
+          req.send();
+        }
+
+        const countup = function(){
+          console.log(count_draw++);
+          modify_biorhythm_base(count_draw);
+          const id = setTimeout(countup, 10000);
+          if(count_draw > 5){
+            clearTimeout(id);
+            console.log('count up end.');
+            redraw.disabled = false;
+          }
+        }
+        countup();
+      });
+
     </script>
 </body>
 </html>
