@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/rykawamu/biorhythm_chart_project#readme",
   "dependencies": {
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "netlify-lambda": "^1.4.7"
   }
 }
